@@ -48,6 +48,7 @@ def main():
     parser.add_argument("--num-concurrent", type=int, default=1)
     parser.add_argument("--output-parser", type=str, default=None)
     parser.add_argument("--output-dir", type=str, default="./output")
+    parser.add_argument("--force-regenerate", action="store_true", help="Force regeneration even if output files exist")
     args, unknown_args = parser.parse_known_args()
     unknown_args_dict = {unknown_args[i].lstrip('--'): handle_arg_string(unknown_args[i + 1]) for i in range(0, len(unknown_args), 2)}
 
@@ -62,6 +63,23 @@ def main():
     task_name = args.task_name
     directions = get_directions(src_lang, tgt_lang, langs)
     unidirectional = is_unidirectional(task_name)
+
+    model_name = os.path.basename(args.model_name)
+    output_dir = os.path.join(args.output_dir, model_name, task_name)
+    os.makedirs(output_dir, exist_ok=True)
+    filtered_directions = []
+    for s_l, t_l in directions:
+        output_file = f"result_{s_l}-{t_l}.json"
+        if os.path.exists(os.path.join(output_dir, output_file)) and not args.force_regenerate:
+            print(f"Skipping {s_l}-{t_l} as the output file already exists.")
+        else:
+            if args.force_regenerate and os.path.exists(os.path.join(output_dir, output_file)):
+                print(f"Regenerating {s_l}-{t_l} as --force-regenerate is enabled.")
+            filtered_directions.append((s_l, t_l))
+    directions = filtered_directions
+    if not directions:
+        print("All output files already exist. Exiting.")
+        return
 
     print("Loading test set and building prompts...")
     prompts, sizes = [], []
@@ -82,7 +100,7 @@ def main():
             tgt_datasets[d] = tgt_dataset
             prompts.extend(build_prompts(src_dataset, s_l, t_l, task_name))
             sizes.append(len(src_dataset))
-    
+
     messages = [[{"role": "user", "content": prompt}] for prompt in prompts]
 
     print(f"Building model {args.model_name}")
@@ -95,9 +113,6 @@ def main():
     outputs = model_output_parser.parse(outputs)
     post_process(outputs, task_name)
 
-    model_name = os.path.basename(args.model_name)
-    output_dir = os.path.join(args.output_dir, model_name, task_name)
-    os.makedirs(output_dir, exist_ok=True)
     offset = 0
     for (src_lang, tgt_lang), size in zip(directions, sizes):
         hyps = outputs[offset: offset + size]

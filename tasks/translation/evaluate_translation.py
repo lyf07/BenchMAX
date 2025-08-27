@@ -18,7 +18,7 @@ def main():
     parser.add_argument("--tgt-lang", "-t", type=str, default=None)
     parser.add_argument("--languages", "-l", type=str, default=None)
     parser.add_argument("--task-name", type=str, required=True, help="The task name of test set")
-    parser.add_argument("--metrics", type=str, help="The metrics to evaluate the translations, splitted by comma. Available metrics: spBLEU, ChrF, TER")
+    parser.add_argument("--metrics", type=str, help="The metrics to evaluate the translations, splitted by comma. Available metrics: spBLEU, BLEU, ChrF, TER, xComet")
     parser.add_argument("--model-name", "-m", type=str, required=True)
     parser.add_argument("--output-dir", type=str, default="./output")
     args = parser.parse_args()
