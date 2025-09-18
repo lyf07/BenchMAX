@@ -70,7 +70,7 @@ def main():
                 elif metric == "TER":
                     score = get_ter(hyps, refs)
                 elif metric == "xComet":
-                    srcs = src_datasets[s_l]["text"]
+                    srcs = src_datasets[f"{s_l}-{t_l}"]["text"] if unidirectional else src_datasets[s_l]["text"]
                     score = get_xComet(srcs, hyps, refs)
                 else:
                     raise ValueError(f"Unknown metric: {metric}")

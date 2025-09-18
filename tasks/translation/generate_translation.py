@@ -31,6 +31,14 @@ def build_prompts(src_dataset, src_lang, tgt_lang, task):
         prompts.append(prompt)
     return prompts
 
+def is_done(fpath):
+    try:
+        with open(fpath, "r", encoding="utf-8") as reader:
+            _ = json.load(reader)
+        return True
+    except:
+        return False
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -70,10 +78,11 @@ def main():
     filtered_directions = []
     for s_l, t_l in directions:
         output_file = f"result_{s_l}-{t_l}.json"
-        if os.path.exists(os.path.join(output_dir, output_file)) and not args.force_regenerate:
+        done = is_done(os.path.join(output_dir, output_file))
+        if done and not args.force_regenerate:
             print(f"Skipping {s_l}-{t_l} as the output file already exists.")
         else:
-            if args.force_regenerate and os.path.exists(os.path.join(output_dir, output_file)):
+            if args.force_regenerate and done:
                 print(f"Regenerating {s_l}-{t_l} as --force-regenerate is enabled.")
             filtered_directions.append((s_l, t_l))
     directions = filtered_directions
