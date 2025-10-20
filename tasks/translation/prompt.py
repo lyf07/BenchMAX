@@ -81,6 +81,7 @@ LANG_DICT.update({
     "luo": "Dholuo",
     "kea": "Kabuverdianu",
     "zhtrad": "Traditional Chinese",
+    "zho_trad": "Traditional Chinese",
     "my": "Burmese",
     "uz": "Uzbek",
     "kk": "Kazakh",
